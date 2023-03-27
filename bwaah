@@ -1,0 +1,46 @@
+#!/bin/sh
+set -e
+
+if [ -f ~/.bwaahrc ]; then
+    . ~/.bwaahrc
+else
+    echo "No ~/.bwaahrc file found. Please create one with the following content:"
+    echo "ACCOUNT=your.onelogin.com"
+    exit 1
+fi
+
+if [ -z "$ACCOUNT" ]; then
+    echo "No ACCOUNT variable found in ~/.bwaahrc file. Please create one with the following content:"
+    echo "ACCOUNT=your.onelogin.com"
+    exit 1
+fi
+
+echo '______  _  _  _ _______ _______ _     _ *'
+echo '|_____] |  |  | |_____| |_____| |_____|'
+echo '|_____] |__|__| |     | |     | |     |'
+echo
+echo '* BitWarden Aws Authentication Helper'
+echo
+
+BW_SESSION=$(bw unlock --raw)
+export BW_SESSION
+
+if [ -z "$BW_SESSION" ]; then
+    echo "Failed to unlock BitWarden. Bwaah-bwaah :("
+    exit 1
+fi
+
+echo "Bwaah-bwaah-bwaah! Unlocked successfully!"
+echo "Logging in to AWS. Bwaah!"
+
+bw sync
+
+EMAIL="$(bw get username $ACCOUNT --raw)"
+export EMAIL
+PASSWORD="$(bw get password $ACCOUNT --raw)"
+export PASSWORD
+OTP="$(bw get totp $ACCOUNT --raw)"
+export OTP
+
+
+onelogin-auth login
